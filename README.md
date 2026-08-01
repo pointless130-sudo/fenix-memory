@@ -8,9 +8,13 @@ on every cold start, and dies with the session. fenix-memory replaces it
 with typed, content-addressed shards, a constant-size manifest,
 Merkle-rooted append-only history, and decision receipts. The measured
 result (invariant I5): **recall cost is O(relevant shards), never
-O(history)** — in our benchmark, naive transcript replay grew **27.9x**
-from 10 to 1,000 committed decisions while addressed recall grew
-**1.00x**. Reproduce it yourself: `python -m bench.run`.
+O(history)** — measured with real API token counts on a pinned model
+(claude-haiku-4-5), naive transcript replay grew **26.3x** from 10 to
+1,000 committed decisions while addressed recall stayed **flat at
+1.00x** (~2,770 tokens/task) — **47x cheaper per task** at 1,000
+decisions, with 3.6x lower latency. Reproduce it: `python -m bench.run`
+(offline mock mode) or `python -m bench.run --real --cap 3.0` (your own
+API key, hard spend cap enforced in code).
 
 Everything in this repository is **MIT-licensed and runs entirely
 locally**: no blockchain, no wallet, no account, no network, no API key.
