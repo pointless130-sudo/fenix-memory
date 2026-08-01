@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import sys
@@ -37,7 +37,7 @@ TOOLS = [
     },
     {
         "name": "memory_recall",
-        "description": ("Resolve only matching shards via the manifest — never replays history. "
+        "description": ("Resolve only matching shards via the manifest - never replays history. "
                         "Query fields (ANDed): type, key, prefix, contains."),
         "inputSchema": {
             "type": "object",
@@ -117,7 +117,8 @@ class MCPServer:
         stdin = stdin or sys.stdin
         stdout = stdout or sys.stdout
         for line in stdin:
-            line = line.strip()
+            # lstrip BOM: Windows pipes often prepend U+FEFF to the first line
+            line = line.strip().lstrip("\ufeff")
             if not line:
                 continue
             try:
@@ -139,3 +140,4 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     MCPServer(args.memory_dir).serve_stdio()
     return 0
+

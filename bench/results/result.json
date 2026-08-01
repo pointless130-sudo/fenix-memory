@@ -9,14 +9,14 @@
       "A_naive": {
         "input_tokens_per_task": 10560,
         "output_tokens_per_task": 9,
-        "latency_s_per_task": 9.115040302276612e-06,
+        "latency_s_per_task": 8.039979729801416e-06,
         "cold_start_tokens_per_invocation": 3520,
         "within_invocation_cache_hit_rate": 0.6645833333333333
       },
       "B_addressed": {
         "input_tokens_per_task": 3859.5,
         "output_tokens_per_task": 6,
-        "latency_s_per_task": 7.105013355612755e-06,
+        "latency_s_per_task": 9.31998947635293e-06,
         "cold_start_tokens_per_invocation": 1286.5,
         "within_invocation_cache_hit_rate": 0.660966445569867
       }
@@ -25,14 +25,14 @@
       "A_naive": {
         "input_tokens_per_task": 36315,
         "output_tokens_per_task": 9,
-        "latency_s_per_task": 1.5954975970089437e-05,
+        "latency_s_per_task": 1.180002000182867e-05,
         "cold_start_tokens_per_invocation": 12105,
         "within_invocation_cache_hit_rate": 0.6660608563954289
       },
       "B_addressed": {
         "input_tokens_per_task": 3859.5,
         "output_tokens_per_task": 6,
-        "latency_s_per_task": 6.584997754544019e-06,
+        "latency_s_per_task": 6.345007568597793e-06,
         "cold_start_tokens_per_invocation": 1286.5,
         "within_invocation_cache_hit_rate": 0.660966445569867
       }
@@ -41,14 +41,14 @@
       "A_naive": {
         "input_tokens_per_task": 294504,
         "output_tokens_per_task": 9,
-        "latency_s_per_task": 0.00011440500384196639,
+        "latency_s_per_task": 9.844002779573202e-05,
         "cold_start_tokens_per_invocation": 98168,
         "within_invocation_cache_hit_rate": 0.6665919647950452
       },
       "B_addressed": {
         "input_tokens_per_task": 3859.5,
         "output_tokens_per_task": 6,
-        "latency_s_per_task": 7.660035043954849e-06,
+        "latency_s_per_task": 1.1460029054433107e-05,
         "cold_start_tokens_per_invocation": 1286.5,
         "within_invocation_cache_hit_rate": 0.660966445569867
       }
