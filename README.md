@@ -1,12 +1,26 @@
-# fenix-block — Phase A0
+# fenix-memory
 
-An L0/L1 memory substrate for AI agents: typed, content-addressed shards,
-a sub-2KB manifest, Merkle-rooted append-only history, and decision
-receipts — plus the benchmark that proves the headline claim (invariant
-I5): **recall cost is O(relevant shards), never O(history)**.
+**Durable, addressable, provable memory for any AI agent — and recall
+cost that stays flat as history grows.**
 
-No blockchain, no wallet, no gas, no network, no API key. See
-`CLAUDE.md` (constitution) and `PHASE_A0_BRIEF.md` (scope).
+Agent memory today is a transcript: it grows forever, must be replayed
+on every cold start, and dies with the session. fenix-memory replaces it
+with typed, content-addressed shards, a constant-size manifest,
+Merkle-rooted append-only history, and decision receipts. The measured
+result (invariant I5): **recall cost is O(relevant shards), never
+O(history)** — in our benchmark, naive transcript replay grew **27.9x**
+from 10 to 1,000 committed decisions while addressed recall grew
+**1.00x**. Reproduce it yourself: `python -m bench.run`.
+
+Everything in this repository is **MIT-licensed and runs entirely
+locally**: no blockchain, no wallet, no account, no network, no API key.
+Part of the Fenix family alongside fenix-yield and fenix-intel. Hosted
+extras (cloud sync, team memory, hosted verification/anchoring, the
+dashboard) are a separate paid service — see `NOTICE.md`; the local
+substrate is free forever.
+
+See `CLAUDE.md` (project constitution) and `PHASE_A0_BRIEF.md` (build
+brief) for how this was built and verified.
 
 ## Layout
 
@@ -87,3 +101,27 @@ Addressing is CIDv1 (raw codec, sha2-256, base32) — byte-compatible with
 IPFS so L2 anchoring drops in later without rewriting committed history.
 Every shard carries an encryption envelope and a provenance pointer from
 its first commit (Gotcha G5), consumed by later phases.
+
+## Free vs. hosted
+
+| | |
+|---|---|
+| **Free forever (this repo, MIT)** | The full local substrate: SDK, MCP server, sidecar, CLI, the `/fenix-memory` skill, benchmark, tests. Your memory, your disk, verifiable offline. |
+| **Fenix portal (paid, coming)** | Cloud memory sync + encrypted backup across machines · team shared memory with per-member attribution · hosted verifier + on-chain anchoring (the L2 trust layer as a service) · dashboard: browse shards, replay decisions, cost analytics. |
+
+The free tier is not a demo — it is the complete L0/L1 architecture and
+will stay MIT. The paid tier is infrastructure we run so you don't have to.
+
+## Roadmap
+
+- **Phase A (done):** L0/L1 substrate, benchmark, reference agent, MCP /
+  sidecar / CLI / skill surfaces.
+- **Phase B:** on-chain anchoring of memory roots, Merkle inclusion +
+  policy predicate proofs, encrypted private shards.
+- **Phase C:** fork-a-brain, permissionless shared gotchas registry,
+  public verifier, quickstart.
+
+## License
+
+MIT — see `LICENSE`. Code is free forever; the Fenix names and the
+hosted services are not part of the grant — see `NOTICE.md`.
