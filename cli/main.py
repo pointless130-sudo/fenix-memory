@@ -83,7 +83,8 @@ def main(argv: list[str] | None = None) -> int:
 
         params: dict = {"memory_dir": args.dir}
         if args.cmd == "commit":
-            params["shards"] = json.loads(Path(args.file).read_text("utf-8"))
+            # utf-8-sig: tolerate the BOM Windows PowerShell writes with -Encoding utf8
+            params["shards"] = json.loads(Path(args.file).read_text("utf-8-sig"))
             params["committed_at"] = args.committed_at
         elif args.cmd == "recall":
             params["query"] = json.loads(args.query)
