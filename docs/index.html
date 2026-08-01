@@ -157,11 +157,37 @@ $ python -m cli --dir ./mymem prove --claim '{"type":"gotchas","key":"gotcha.sql
   <div class="wrap center">
     <h2>Get early access to the portal</h2>
     <p class="lead" style="margin:0 auto">Founding-member pricing for the waitlist. No spam — one email when it opens.</p>
-    <!-- Create a free form at formspree.io and replace YOUR_FORM_ID below -->
-    <form class="waitlist" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-      <input type="email" name="email" placeholder="you@example.com" required>
-      <button class="btn primary" type="submit">Join the waitlist</button>
+    <form class="waitlist" onsubmit="return joinWaitlist(event)">
+      <input type="email" id="wlEmail" name="email" placeholder="you@example.com" required>
+      <button class="btn primary" id="wlBtn" type="submit">Join the waitlist</button>
     </form>
+    <p class="note" id="wlMsg"></p>
+    <script>
+    async function joinWaitlist(ev) {
+      ev.preventDefault();
+      const email = document.getElementById('wlEmail').value.trim();
+      const msg = document.getElementById('wlMsg');
+      const btn = document.getElementById('wlBtn');
+      btn.disabled = true; btn.textContent = 'Joining…'; msg.textContent = '';
+      try {
+        const res = await fetch('https://mobile-api.fenix-yield.com/api/waitlist', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email, platform: 'fenix-memory', ref: ''}),
+        });
+        if (res.ok) {
+          msg.textContent = "🎉 You're on the list — we'll email you when the portal opens.";
+          document.getElementById('wlEmail').value = '';
+        } else {
+          msg.textContent = 'Something went wrong. Please try again.';
+        }
+      } catch (e) {
+        msg.textContent = 'Could not connect. Please try again.';
+      }
+      btn.disabled = false; btn.textContent = 'Join the waitlist';
+      return false;
+    }
+    </script>
     <p class="note">Or just <a style="color:var(--accent)" href="https://github.com/pointless130-sudo/fenix-memory">star the repo</a> — releases are announced there.</p>
   </div>
 </section>
