@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from sdk.api import DispatchError, dispatch  # noqa: E402
 from sdk.memory import Memory  # noqa: E402
+from sdk.store import IntegrityError  # noqa: E402
 
 
 def _emit(result: dict) -> None:
@@ -104,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
 
         _emit(dispatch(args.cmd, params))
         return 0
-    except (DispatchError, json.JSONDecodeError, OSError) as exc:
+    except (DispatchError, IntegrityError, json.JSONDecodeError, OSError, KeyError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2
 
