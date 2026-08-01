@@ -173,7 +173,7 @@ $ python -m cli --dir ./mymem prove --claim '{"type":"gotchas","key":"gotcha.sql
         const res = await fetch('https://mobile-api.fenix-yield.com/api/waitlist', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({email, platform: 'fenix-memory', ref: ''}),
+          body: JSON.stringify({email, platform: 'fenix-memory', ref: 'landing-page'}),
         });
         if (res.ok) {
           msg.textContent = "🎉 You're on the list — we'll email you when the portal opens.";
