@@ -109,12 +109,22 @@ class CodeGotchasAgent:
             return
         self.degraded_reason = None
         self.state = "IDLE"
-        self.alerts.append(f"human recovery acknowledged: {ack}")
+        self._alert(f"human recovery acknowledged: {ack}")
+        (self.memory.dir / "STATE").write_text("IDLE", encoding="utf-8")
+
+    def _alert(self, line: str) -> None:
+        """Alerts are surfaced in-process AND persisted (append-only log +
+        STATE ref) so an operator's `cli status` can see DEGRADED — a halt
+        nobody is told about is a failure, not a safe state."""
+        self.alerts.append(line)
+        with open(self.memory.dir / "alerts.log", "a", encoding="utf-8") as f:
+            f.write(line + "\n")
 
     def _enter_degraded(self, reason: str) -> None:
         self.state = "DEGRADED"
         self.degraded_reason = reason
-        self.alerts.append(f"DEGRADED: {reason}")
+        self._alert(f"DEGRADED: {reason}")
+        (self.memory.dir / "STATE").write_text(f"DEGRADED: {reason}", encoding="utf-8")
 
     # ---- shard constructors (deterministic; shared with the parity test, I12) ----
 

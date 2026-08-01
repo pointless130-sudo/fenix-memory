@@ -13,9 +13,33 @@ No blockchain, no wallet, no gas, no network, no API key. See
 ```
 /sdk        core three verbs: commit, recall, prove  (+ ext: export, import, fork, replay)
 /agents/codegotchas   reference agent — consults verified gotchas before approving a change
-/bench      the benchmark harness — the deliverable
+/bench      the benchmark harness — the A0 deliverable
+/mcp_server MCP server (stdio, zero-dependency): memory_commit / memory_recall / memory_prove
+/sidecar    local HTTP sidecar: POST /commit /recall /prove, GET /status
+/cli        operator tooling: init, status (incl. DEGRADED + alerts), commit, recall,
+            prove, replay, export, import, fork
+/skills     invocable skill (the judgement layer) + portable constitution template
 /tests      one property test per in-scope invariant, incl. negative cases
 ```
+
+## Interface surfaces (A1)
+
+Every surface is a thin shell over one shared dispatch core, so the same
+operation issued via SDK, MCP, sidecar, or CLI produces byte-identical
+committed state (invariant I12 — tested across a real process boundary).
+
+MCP (stdio), e.g. for Claude Code:
+
+```json
+{"mcpServers": {"fenix-block": {"command": "python",
+  "args": ["-m", "mcp_server", "--memory-dir", "/path/to/memory"],
+  "cwd": "/path/to/fenix-block"}}}
+```
+
+Sidecar for non-MCP runtimes: `python -m sidecar --memory-dir ./mymemory --port 7691`
+
+CLI: `python -m cli --dir ./mymemory status` (add `--watch 300 --on-degraded "<cmd>"`
+to run a command the moment the agent enters DEGRADED).
 
 ## Run the benchmark
 
