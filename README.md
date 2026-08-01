@@ -19,6 +19,9 @@ extras (cloud sync, team memory, hosted verification/anchoring, the
 dashboard) are a separate paid service — see `NOTICE.md`; the local
 substrate is free forever.
 
+**New here? Start with [QUICKSTART.md](QUICKSTART.md) — 10 minutes to
+provable agent memory.**
+
 See `CLAUDE.md` (project constitution) and `PHASE_A0_BRIEF.md` (build
 brief) for how this was built and verified.
 
