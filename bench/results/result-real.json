@@ -1,0 +1,71 @@
+{
+  "model_version": "claude-haiku-4-5",
+  "tokenizer": "anthropic-api usage fields (real)",
+  "note": "REAL-MODE figures: absolute token counts from the API on the pinned model. Cache-hit figures are not measured in real mode.",
+  "tasks_per_set": 5,
+  "steps_per_invocation": 1,
+  "history_sizes": {
+    "10": {
+      "A_naive": {
+        "input_tokens_per_task": 5326,
+        "output_tokens_per_task": 37,
+        "latency_s_per_task": 1.5166929999832064,
+        "cold_start_tokens_per_invocation": 5326,
+        "within_invocation_cache_hit_rate": 0.0,
+        "tasks_measured": 5
+      },
+      "B_addressed": {
+        "input_tokens_per_task": 2771,
+        "output_tokens_per_task": 33.4,
+        "latency_s_per_task": 1.6015800999943166,
+        "cold_start_tokens_per_invocation": 2771,
+        "within_invocation_cache_hit_rate": 0.0,
+        "tasks_measured": 5
+      }
+    },
+    "100": {
+      "A_naive": {
+        "input_tokens_per_task": 17566,
+        "output_tokens_per_task": 50,
+        "latency_s_per_task": 2.3566933800000696,
+        "cold_start_tokens_per_invocation": 17566,
+        "within_invocation_cache_hit_rate": 0.0,
+        "tasks_measured": 5
+      },
+      "B_addressed": {
+        "input_tokens_per_task": 2766,
+        "output_tokens_per_task": 42.4,
+        "latency_s_per_task": 1.2311098199803383,
+        "cold_start_tokens_per_invocation": 2766,
+        "within_invocation_cache_hit_rate": 0.0,
+        "tasks_measured": 5
+      }
+    },
+    "1000": {
+      "A_naive": {
+        "input_tokens_per_task": 139966,
+        "output_tokens_per_task": 41.8,
+        "latency_s_per_task": 4.504078539973125,
+        "cold_start_tokens_per_invocation": 139966,
+        "within_invocation_cache_hit_rate": 0.0,
+        "tasks_measured": 5
+      },
+      "B_addressed": {
+        "input_tokens_per_task": 2769,
+        "output_tokens_per_task": 38.4,
+        "latency_s_per_task": 1.238895079959184,
+        "cold_start_tokens_per_invocation": 2769,
+        "within_invocation_cache_hit_rate": 0.0,
+        "tasks_measured": 5
+      }
+    }
+  },
+  "spend_usd": 0.8619,
+  "spend_cap_usd": 3.0,
+  "scaling": {
+    "arm_A_growth_10_to_1000": 26.279759669545626,
+    "arm_B_growth_10_to_1000": 0.9992782389029231,
+    "pass_condition": "Arm B per-task input cost does not scale with history (growth <= 1.25x)",
+    "pass": true
+  }
+}

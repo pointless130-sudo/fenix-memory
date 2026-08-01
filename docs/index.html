@@ -102,8 +102,8 @@
 </div>
 
 <div class="numbers wrap">
-  <div class="stat"><div class="big grow">27.9×</div><div class="lbl">cost growth with transcript replay<br>(10 → 1,000 decisions)</div></div>
-  <div class="stat"><div class="big flat">1.00×</div><div class="lbl">cost growth with fenix-memory<br>(10 → 1,000 decisions)</div></div>
+  <div class="stat"><div class="big grow">47×</div><div class="lbl">cheaper per task at 1,000 decisions<br>(real API tokens, Haiku pricing)</div></div>
+  <div class="stat"><div class="big flat">1.00×</div><div class="lbl">cost growth with fenix-memory<br>(10 → 1,000 decisions — flat)</div></div>
   <div class="stat"><div class="big">0</div><div class="lbl">accounts, keys, or network calls<br>to run it locally</div></div>
 </div>
 
@@ -111,16 +111,21 @@
   <div class="wrap">
     <h2>Measured, not promised</h2>
     <p class="lead">The benchmark ships in the repo. Identical task sets, two strategies:
-    naive transcript replay versus addressed recall over typed, content-addressed memory shards.
-    Reproduce it with one command: <code style="font-family:var(--mono)">python -m bench.run</code></p>
+    naive transcript replay versus addressed recall over typed, content-addressed memory
+    shards — measured with <b>real API token counts</b> on a pinned model
+    (claude-haiku-4-5). Reproduce it:
+    <code style="font-family:var(--mono)">python -m bench.run --real</code></p>
     <div class="tablebox"><table>
-      <tr><th>Committed decisions</th><th>Transcript replay (tokens/task)</th><th>fenix-memory (tokens/task)</th></tr>
-      <tr><td class="mono">10</td><td class="mono">10,560</td><td class="mono">3,860</td></tr>
-      <tr><td class="mono">100</td><td class="mono">36,315</td><td class="mono">3,860</td></tr>
-      <tr><td class="mono">1,000</td><td class="mono">294,504</td><td class="mono">3,860</td></tr>
-      <tr><td>Growth</td><td><span class="grow">27.9× — scales with history</span></td><td><span class="flat">1.00× — flat</span></td></tr>
+      <tr><th>Committed decisions</th><th>Transcript replay (real tokens/task)</th><th>fenix-memory (real tokens/task)</th></tr>
+      <tr><td class="mono">10</td><td class="mono">5,326</td><td class="mono">2,771</td></tr>
+      <tr><td class="mono">100</td><td class="mono">17,566</td><td class="mono">2,766</td></tr>
+      <tr><td class="mono">1,000</td><td class="mono">139,966</td><td class="mono">2,769</td></tr>
+      <tr><td>Growth</td><td><span class="grow">26.3× — scales with history</span></td><td><span class="flat">1.00× — flat</span></td></tr>
     </table></div>
-    <p class="note">Mock-tokenizer figures — valid for the scaling shape; run the harness on your own workload for absolute numbers. Model version is recorded with every figure.</p>
+    <p class="note">At Haiku pricing ($1/MTok in), a task at 1,000-decision history costs ~$0.140
+    under replay vs ~$0.003 with addressed recall — 47× cheaper, with 3.6× lower latency
+    (4.5s → 1.2s). On Sonnet/Opus pricing, multiply the dollar gap by 3–5×. Model version is
+    recorded with every figure; a zero-cost mock mode reproduces the scaling shape offline.</p>
 
     <h2 style="margin-top:48px">How it works</h2>
     <p class="lead">Memory is a Merkle DAG of four typed shards — <b>facts</b>, <b>decisions</b>,

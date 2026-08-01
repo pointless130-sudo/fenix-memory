@@ -1,0 +1,17 @@
+model: claude-haiku-4-5   tokenizer: anthropic-api usage fields (real)
+
+    N | arm         |  in tok/task | out tok/task |  latency s | cold-start tok | cache hit
+------------------------------------------------------------------------------------------
+   10 | A_naive     |       5326.0 |         37.0 |     1.5167 |         5326.0 |     0.00%
+   10 | B_addressed |       2771.0 |         33.4 |     1.6016 |         2771.0 |     0.00%
+  100 | A_naive     |      17566.0 |         50.0 |     2.3567 |        17566.0 |     0.00%
+  100 | B_addressed |       2766.0 |         42.4 |     1.2311 |         2766.0 |     0.00%
+ 1000 | A_naive     |     139966.0 |         41.8 |     4.5041 |       139966.0 |     0.00%
+ 1000 | B_addressed |       2769.0 |         38.4 |     1.2389 |         2769.0 |     0.00%
+------------------------------------------------------------------------------------------
+Arm A growth 10→1000 decisions: 26.28x
+Arm B growth 10→1000 decisions: 1.00x
+PASS (I5): True
+API spend: $0.86 (cap $3.00)
+
+REAL-MODE figures: absolute token counts from the API on the pinned model. Cache-hit figures are not measured in real mode.
