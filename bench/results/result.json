@@ -1,0 +1,63 @@
+{
+  "model_version": "mock-model-v0",
+  "tokenizer": "mock-tokenizer-v0 (chars//4)",
+  "note": "MOCK-MODE figures: valid for the scaling shape (flat vs linear), not absolute cost. Cold-start and cache figures are separate by design.",
+  "tasks_per_set": 20,
+  "steps_per_invocation": 3,
+  "history_sizes": {
+    "10": {
+      "A_naive": {
+        "input_tokens_per_task": 10560,
+        "output_tokens_per_task": 9,
+        "latency_s_per_task": 9.115040302276612e-06,
+        "cold_start_tokens_per_invocation": 3520,
+        "within_invocation_cache_hit_rate": 0.6645833333333333
+      },
+      "B_addressed": {
+        "input_tokens_per_task": 3859.5,
+        "output_tokens_per_task": 6,
+        "latency_s_per_task": 7.105013355612755e-06,
+        "cold_start_tokens_per_invocation": 1286.5,
+        "within_invocation_cache_hit_rate": 0.660966445569867
+      }
+    },
+    "100": {
+      "A_naive": {
+        "input_tokens_per_task": 36315,
+        "output_tokens_per_task": 9,
+        "latency_s_per_task": 1.5954975970089437e-05,
+        "cold_start_tokens_per_invocation": 12105,
+        "within_invocation_cache_hit_rate": 0.6660608563954289
+      },
+      "B_addressed": {
+        "input_tokens_per_task": 3859.5,
+        "output_tokens_per_task": 6,
+        "latency_s_per_task": 6.584997754544019e-06,
+        "cold_start_tokens_per_invocation": 1286.5,
+        "within_invocation_cache_hit_rate": 0.660966445569867
+      }
+    },
+    "1000": {
+      "A_naive": {
+        "input_tokens_per_task": 294504,
+        "output_tokens_per_task": 9,
+        "latency_s_per_task": 0.00011440500384196639,
+        "cold_start_tokens_per_invocation": 98168,
+        "within_invocation_cache_hit_rate": 0.6665919647950452
+      },
+      "B_addressed": {
+        "input_tokens_per_task": 3859.5,
+        "output_tokens_per_task": 6,
+        "latency_s_per_task": 7.660035043954849e-06,
+        "cold_start_tokens_per_invocation": 1286.5,
+        "within_invocation_cache_hit_rate": 0.660966445569867
+      }
+    }
+  },
+  "scaling": {
+    "arm_A_growth_10_to_1000": 27.888636363636362,
+    "arm_B_growth_10_to_1000": 1.0,
+    "pass_condition": "Arm B per-task input cost does not scale with history (growth <= 1.25x)",
+    "pass": true
+  }
+}

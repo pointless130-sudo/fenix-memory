@@ -1,0 +1,16 @@
+model: mock-model-v0   tokenizer: mock-tokenizer-v0 (chars//4)
+
+    N | arm         |  in tok/task | out tok/task |  latency s | cold-start tok | cache hit
+------------------------------------------------------------------------------------------
+   10 | A_naive     |      10560.0 |          9.0 |     0.0000 |         3520.0 |    66.46%
+   10 | B_addressed |       3859.5 |          6.0 |     0.0000 |         1286.5 |    66.10%
+  100 | A_naive     |      36315.0 |          9.0 |     0.0000 |        12105.0 |    66.61%
+  100 | B_addressed |       3859.5 |          6.0 |     0.0000 |         1286.5 |    66.10%
+ 1000 | A_naive     |     294504.0 |          9.0 |     0.0001 |        98168.0 |    66.66%
+ 1000 | B_addressed |       3859.5 |          6.0 |     0.0000 |         1286.5 |    66.10%
+------------------------------------------------------------------------------------------
+Arm A growth 10→1000 decisions: 27.89x
+Arm B growth 10→1000 decisions: 1.00x
+PASS (I5): True
+
+MOCK-MODE figures: valid for the scaling shape (flat vs linear), not absolute cost. Cold-start and cache figures are separate by design.
