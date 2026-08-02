@@ -52,9 +52,9 @@ committed state (invariant I12 — tested across a real process boundary).
 MCP (stdio), e.g. for Claude Code:
 
 ```json
-{"mcpServers": {"fenix-block": {"command": "python",
+{"mcpServers": {"fenix-memory": {"command": "python",
   "args": ["-m", "mcp_server", "--memory-dir", "/path/to/memory"],
-  "cwd": "/path/to/fenix-block"}}}
+  "cwd": "/path/to/fenix-memory"}}}
 ```
 
 Sidecar for non-MCP runtimes: `python -m sidecar --memory-dir ./mymemory --port 7691`

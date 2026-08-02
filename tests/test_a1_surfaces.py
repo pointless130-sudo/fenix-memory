@@ -111,7 +111,7 @@ def test_mcp_stdio_round_trip(tmp_path):
     responses = [json.loads(l) for l in stdout.getvalue().splitlines()]
     by_id = {r.get("id"): r for r in responses}
 
-    assert by_id[0]["result"]["serverInfo"]["name"] == "fenix-block"
+    assert by_id[0]["result"]["serverInfo"]["name"] == "fenix-memory"
     assert [t["name"] for t in by_id[1]["result"]["tools"]] == [
         "memory_commit", "memory_recall", "memory_prove"]  # exactly three (G6)
     root = json.loads(by_id[2]["result"]["content"][0]["text"])["root"]

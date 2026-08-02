@@ -76,12 +76,12 @@ class SidecarHandler(BaseHTTPRequestHandler):
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
-    ap = argparse.ArgumentParser(description="fenix-block HTTP sidecar (localhost)")
+    ap = argparse.ArgumentParser(description="fenix-memory HTTP sidecar (localhost)")
     ap.add_argument("--memory-dir", required=True)
     ap.add_argument("--port", type=int, default=7691)
     args = ap.parse_args(argv)
     handler = type("Handler", (SidecarHandler,), {"memory_dir": args.memory_dir})
     server = HTTPServer(("127.0.0.1", args.port), handler)
-    print(f"fenix-block sidecar on http://127.0.0.1:{args.port} (memory: {args.memory_dir})")
+    print(f"fenix-memory sidecar on http://127.0.0.1:{args.port} (memory: {args.memory_dir})")
     server.serve_forever()
     return 0

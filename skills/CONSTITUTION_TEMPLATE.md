@@ -1,6 +1,6 @@
 # <project> — Agent Constitution (template)
 
-Portable discipline for any project adopting the fenix-block memory
+Portable discipline for any project adopting the fenix-memory memory
 substrate — usable with or without the chain layers.
 
 ## Principles

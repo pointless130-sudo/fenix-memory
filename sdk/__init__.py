@@ -1,4 +1,4 @@
-"""fenix-block core SDK — three verbs: commit, recall, prove.
+"""fenix-memory core SDK — three verbs: commit, recall, prove.
 
 Secondary namespace lives in sdk.ext (export, import, fork, replay).
 """

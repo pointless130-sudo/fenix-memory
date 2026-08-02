@@ -2,7 +2,7 @@
 name: fenix-memory
 description: >
   Give this agent durable, addressable, provable memory via the
-  fenix-block substrate. Supplies the judgement the tool layer cannot:
+  fenix-memory substrate. Supplies the judgement the tool layer cannot:
   when a run is worth committing, what belongs in a gotcha versus a
   fact, and when to consult memory before acting.
 ---

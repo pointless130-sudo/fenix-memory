@@ -1,4 +1,4 @@
-# fenix-block — Project Constitution
+# fenix-memory — Project Constitution
 
 Read this before every task. It governs all work in this repository.
 
@@ -6,7 +6,7 @@ Read this before every task. It governs all work in this repository.
 
 ## 1. What this project is
 
-**fenix-block** is an open framework that gives any AI agent memory that persists,
+**fenix-memory** is an open framework that gives any AI agent memory that persists,
 costs less to recall, and can be proved.
 
 It replaces the transcript — a linear log that must be replayed — with an addressable,

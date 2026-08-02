@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import sys
@@ -79,7 +79,7 @@ class MCPServer:
                 result = {
                     "protocolVersion": PROTOCOL_VERSION,
                     "capabilities": {"tools": {}},
-                    "serverInfo": {"name": "fenix-block", "version": "0.1.0"},
+                    "serverInfo": {"name": "fenix-memory", "version": "0.1.0"},
                 }
             elif method == "ping":
                 result = {}
@@ -135,7 +135,7 @@ class MCPServer:
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
-    ap = argparse.ArgumentParser(description="fenix-block MCP server (stdio)")
+    ap = argparse.ArgumentParser(description="fenix-memory MCP server (stdio)")
     ap.add_argument("--memory-dir", required=True)
     args = ap.parse_args(argv)
     MCPServer(args.memory_dir).serve_stdio()
