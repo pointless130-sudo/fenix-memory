@@ -84,7 +84,7 @@ python -m pytest tests -q
 ```
 
 The suite runs with no network (enforced by a socket guard) and no API
-key. Requires Python 3.11+ and pytest.
+key. Requires Python 3.9+ and pytest.
 
 ## Core SDK
 

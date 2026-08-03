@@ -1,6 +1,6 @@
 # Quickstart — 10 minutes to provable agent memory
 
-No account, no API key, no network. You need Python 3.11+ and git.
+No account, no API key, no network. You need Python 3.9+ and git.
 
 ## 1. Clone and verify (2 min)
 
