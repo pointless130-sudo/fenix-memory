@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E">
+<title>Agent Memory at Scale: A Field Guide to the Failure Modes | Fenix Memory</title>
+<meta name="description" content="Seven measured failure modes in AI agent memory: the prompt-cache mirage, tokenizer drift, polling cadence, write-gated trust, un-retrofittable fields, verb creep, and the flat manifest that makes recall O(history). With real benchmark numbers.">
+<link rel="canonical" href="https://memory.fenix-yield.com/agent-memory-field-guide.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Fenix Memory">
+<meta property="og:title" content="Agent Memory at Scale: A Field Guide to the Failure Modes">
+<meta property="og:description" content="Seven measured failure modes in agent memory design - including the flat manifest that quietly makes recall O(history), caught by benchmark at 21x cost growth.">
+<meta property="og:url" content="https://memory.fenix-yield.com/agent-memory-field-guide.html">
+<meta property="og:image" content="https://memory.fenix-yield.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Agent Memory at Scale: A Field Guide to the Failure Modes">
+<meta name="twitter:description" content="Seven measured failure modes in agent memory design, with real token counts on a pinned model.">
+<meta name="twitter:image" content="https://memory.fenix-yield.com/og-image.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Agent Memory at Scale: A Field Guide to the Failure Modes",
+  "description": "Seven measured failure modes in AI agent memory design, from prompt-cache accounting to manifest topology, with reproducible benchmark figures on a pinned model.",
+  "datePublished": "2026-08-12",
+  "author": { "@type": "Organization", "name": "Fenix Labs", "url": "https://memory.fenix-yield.com" }
+}
+</script>
+<style>
+:root {
+  --bg:      #0b0e14;
+  --surface: #131824;
+  --surface2:#0f1420;
+  --border:  #232c3d;
+  --accent:  #ff7a45;
+  --accent2: #2f6fd6;
+  --success: #4ade80;
+  --warn:    #f59e0b;
+  --danger:  #ef4444;
+  --text:    #e8ecf4;
+  --muted:   #93a0b4;
+  --radius:  14px;
+  --font:    'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mono:    ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:0 0 80px;}
+
+/* Hero */
+.hero{
+  background:linear-gradient(160deg,#0d1018 0%,#17121c 100%);
+  border-bottom:1px solid var(--border);
+  padding:56px 24px 44px;text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(255,122,69,0.14) 0%,transparent 70%);
+  pointer-events:none;
+}
+.home-link{
+  position:absolute;top:20px;left:24px;z-index:2;
+  display:inline-flex;align-items:center;gap:9px;text-decoration:none;
+  color:var(--muted);font-size:13px;font-weight:600;transition:color 0.15s;
+}
+.home-link:hover{color:var(--text);}
+.home-link .logo{
+  width:30px;height:30px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#2f6fd6 0%,#2f6fd6 45%,#ff7a45 55%,#ff7a45 100%);
+}
+.home-link .logo svg{width:19px;height:19px;display:block;}
+@media (max-width:600px){
+  .home-link{top:14px;left:14px;}
+  .home-link span{display:none;}
+}
+.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+.hero h1{font-size:clamp(24px,5vw,38px);font-weight:800;letter-spacing:-0.6px;margin-bottom:14px;max-width:760px;margin-left:auto;margin-right:auto;line-height:1.2;}
+.hero p{color:var(--muted);font-size:15px;max-width:600px;margin:0 auto;line-height:1.7;}
+.hero-meta{margin-top:18px;font-size:12px;color:var(--muted);}
+.hero-meta code{font-family:var(--mono);color:var(--accent2);font-size:11px;}
+
+/* Tabs */
+.tabs{
+  display:flex;overflow-x:auto;gap:4px;padding:16px 24px;scrollbar-width:none;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;background:var(--bg);
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  flex-shrink:0;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  transition:all 0.15s;white-space:nowrap;text-decoration:none;
+}
+.tab:hover{border-color:var(--accent);color:var(--text);}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#14100c;}
+
+/* Content */
+.content{max-width:720px;margin:0 auto;padding:0 16px;}
+.section{padding-top:44px;}
+.section-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.section-title{font-size:24px;font-weight:700;letter-spacing:-0.3px;margin-bottom:10px;}
+.section-desc,.prose p{color:#b9c2d0;font-size:14.5px;line-height:1.8;margin-bottom:16px;}
+.prose strong{color:var(--text);}
+.prose a{color:var(--accent2);text-decoration:none;border-bottom:1px solid rgba(47,111,214,0.4);}
+.prose a:hover{border-bottom-color:var(--accent2);}
+.prose em{color:#cbd4e2;font-style:italic;}
+
+/* Gotcha numbering */
+.gotcha-tag{
+  display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;
+  color:var(--danger);text-transform:uppercase;
+}
+.gotcha-tag::before{content:'';width:22px;height:2px;background:var(--danger);}
+
+/* Alerts */
+.alert{border-radius:10px;padding:14px 16px;margin:16px 0;font-size:13px;line-height:1.6;display:flex;gap:10px;}
+.alert.warn{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--warn);}
+.alert.info{background:rgba(47,111,214,0.12);border:1px solid rgba(47,111,214,0.35);color:#8ab4f8;}
+.alert.success{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:var(--success);}
+.alert.danger{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+/* Code */
+pre{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:16px;margin:16px 0;overflow-x:auto;font-family:var(--mono);
+  font-size:12.5px;line-height:1.7;color:#c9d1e9;
+}
+code.inline{font-family:var(--mono);font-size:12.5px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--accent2);white-space:nowrap;}
+pre .c{color:#5d6b8f;}
+pre .k{color:#c792ea;}
+pre .s{color:#a5d6a7;}
+pre .f{color:#82aaff;}
+pre .bad{color:#f87171;}
+pre .good{color:#4ade80;}
+
+/* Cards & tables */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:16px 0;}
+.card-title{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.card-body{color:var(--muted);font-size:13px;line-height:1.7;}
+.tablebox{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;}
+th{color:var(--muted);text-transform:uppercase;font-size:10.5px;letter-spacing:1px;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:#b9c2d0;line-height:1.6;vertical-align:top;}
+td code{font-family:var(--mono);font-size:12px;color:var(--accent2);}
+td.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.flat{color:var(--success);font-weight:700;}
+.grow{color:var(--accent);font-weight:700;}
+
+/* Checklist */
+.check{list-style:none;display:flex;flex-direction:column;gap:10px;margin:16px 0;}
+.check li{
+  display:flex;gap:12px;align-items:flex-start;background:var(--surface);
+  border:1px solid var(--border);border-radius:10px;padding:13px 15px;
+  font-size:13.5px;line-height:1.65;color:#b9c2d0;
+}
+.check li::before{content:'\2610';color:var(--success);font-size:15px;flex-shrink:0;margin-top:1px;}
+.check li strong{color:var(--text);}
+
+hr.divider{border:none;border-top:1px solid var(--border);margin:44px 0 0;}
+.footer-note{margin-top:56px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:12.5px;line-height:1.8;text-align:center;}
+.footer-note a{color:var(--accent2);text-decoration:none;}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <a class="home-link" href="index.html" title="Back to Fenix Memory home">
+    <span class="logo"><svg viewBox="0 0 200 200" role="img" aria-label="Fenix Memory logo">
+      <path d="M180.9,6.5 L126.5,67.5 L138.7,87.0 L133.0,97.8 L115.5,104.6 L121.6,121.3 L112.8,116.5 L99.7,119.1 L87.2,106.6 L63.2,95.2 L60.4,83.3 L72.4,67.5 L24.6,10.2 L17.1,7.8 L15.6,17.9 L20.0,48.2 L0.9,36.3 L0.2,53.2 L15.6,85.9 L0.2,83.8 L0.2,87.0 L33.2,120.6 L21.5,127.9 L43.9,140.6 L81.7,148.1 L68.5,172.9 L87.6,177.1 L97.9,193.3 L112.6,176.0 L130.2,172.7 L116.8,148.3 L144.7,143.9 L172.8,131.6 L177.4,125.7 L165.8,120.6 L200.0,83.1 L183.3,85.9 L200.0,49.7 L198.5,35.7 L178.9,48.2 Z" fill="#fff"></path>
+    </svg></span>
+    <span>Fenix Memory</span>
+  </a>
+  <div class="hero-eyebrow">Agent architecture &middot; Field Notes</div>
+  <h1>Agent Memory at Scale:<br>A Field Guide to the Failure Modes</h1>
+  <p>Every agent framework promises memory. Almost none of them tell you what it costs at a thousand decisions. These are seven failure modes we hit building one &mdash; six architectural, one caught only by measurement.</p>
+  <div class="hero-meta">Measured August 2026 &middot; pinned model <code>claude-haiku-4-5</code> &middot; <code>bench.run --real</code></div>
+</div>
+
+<nav class="tabs">
+  <a class="tab active" href="#problem">The problem</a>
+  <a class="tab" href="#g1">Cache mirage</a>
+  <a class="tab" href="#g2">Tokenizer drift</a>
+  <a class="tab" href="#g3">Cadence</a>
+  <a class="tab" href="#g4">Write gates</a>
+  <a class="tab" href="#g5">Retrofits</a>
+  <a class="tab" href="#g6">Verb creep</a>
+  <a class="tab" href="#g7">Flat manifest</a>
+  <a class="tab" href="#numbers">The numbers</a>
+  <a class="tab" href="#verify">Verify</a>
+</nav>
+
+<div class="content prose">
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="problem">
+  <div class="section-eyebrow">Background</div>
+  <h2 class="section-title">Why agent memory gets more expensive every week</h2>
+  <p>Agent memory today is almost always a <strong>transcript</strong>: an append-only log of everything that happened, replayed into the context window on every cold start. It works beautifully at ten decisions and quietly becomes the dominant line item at a thousand.</p>
+  <p>The problem is structural, not an implementation detail. A transcript is <em>linear</em> and can only be replayed. It cannot be queried. So the cost of remembering anything is the cost of re-reading everything, and that cost tracks <strong>history</strong> rather than <strong>relevance</strong>. An agent that has been useful for six months is punished for exactly that.</p>
+  <p>The alternative is to make memory <em>addressable</em>: typed, content-addressed shards behind a constant-size index, so a task loads only what it needs. That single change is what moves recall cost from O(history) to O(relevant shards).</p>
+  <p>The rest of this page is what went wrong on the way there. Most of these are not obvious, several are invisible until you measure, and one of them &mdash; the last &mdash; was invisible to us until the benchmark caught it.</p>
+  <div class="alert info"><span class="alert-icon">&#128161;</span><span>Everything below is drawn from a working MIT-licensed implementation. Where a claim has a number attached, that number came from <code style="font-family:var(--mono)">bench.run</code> on a pinned model, not an estimate.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g1">
+  <div class="gotcha-tag">Gotcha 01</div>
+  <h2 class="section-title">The prompt-cache mirage</h2>
+  <p>Provider prompt caches are the first thing people reach for when context costs bite, and the savings look enormous in a tight test loop. Then the same system saves nothing in production, and nobody can explain why.</p>
+  <p>The reason is that <strong>cache lifetimes are bounded</strong> &mdash; on the order of an hour. An agent invoked less often than the cache lives gets <strong>zero</strong> cross-invocation benefit, no matter how carefully you stabilized your prompt prefix. A daily agent has a cold cache every single run. Cache-stability savings are real only <em>within</em> an invocation, or for agents running more frequently than the TTL.</p>
+  <p>The measurement error this produces is worse than the missed saving. If you report one blended cost-per-task figure, you have mixed two mechanisms with completely different deployment behaviour, and the blend flatters high-frequency deployments while hiding that low-frequency ones get nothing.</p>
+  <div class="alert warn"><span class="alert-icon">&#9888;&#65039;</span><span><strong>Consequence:</strong> report cold-start cost and within-invocation cache hit rate as <em>separate</em> figures. Never publish a blended number. If a benchmark quotes one number for "cost per task" with caching enabled, you cannot tell which mechanism produced the saving &mdash; and neither can its author.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g2">
+  <div class="gotcha-tag">Gotcha 02</div>
+  <h2 class="section-title">Tokenizers are not stable across model generations</h2>
+  <p>A model generation change can shift token counts for byte-identical text by tens of percent. This makes a whole category of published comparison worthless without anyone noticing.</p>
+  <p>If a benchmark run spans a model change &mdash; you started on one generation and the provider rolled forward mid-run &mdash; then the delta you measured is the <strong>tokenizer</strong>, not your architecture. The graph still looks clean. The conclusion is simply about a different thing than you think.</p>
+  <p>This is especially dangerous for memory benchmarks, because the entire claim is denominated in tokens. A 20% tokenizer shift is the same order as many real architectural wins.</p>
+  <div class="alert warn"><span class="alert-icon">&#9888;&#65039;</span><span><strong>Consequence:</strong> pin one model version for the duration of a run and record it alongside every figure you publish. Treat any model change as a new run, not a continuation. If a number in your README has no model version next to it, you do not know what it measures.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g3">
+  <div class="gotcha-tag">Gotcha 03</div>
+  <h2 class="section-title">Cadence is a deployment property, not an architectural one</h2>
+  <p>It is very natural to design an agent around a loop: wake every N hours, look around, decide. We had exactly that in an early plan, inherited from an unrelated design document, and it was wrong.</p>
+  <p>Polling a clock makes cost track <strong>time</strong> instead of <strong>opportunity</strong>. That is the same failure the whole project exists to fix, just relocated from the context window to the scheduler. An agent that wakes hourly and finds nothing to do has spent real money to learn that nothing happened.</p>
+  <p>Worse, baking cadence into the substrate makes it un-tunable later. Deployment frequency is something an operator should decide per-environment; if it is an architectural assumption, every consumer inherits your guess.</p>
+  <div class="alert warn"><span class="alert-icon">&#9888;&#65039;</span><span><strong>Consequence:</strong> the substrate should assume no cadence at all. Prefer event-driven triggers. Where you must poll, split it: a cheap watcher model answers only "did anything change enough to wake the expensive one?" and escalates. Cost then tracks events, not the clock.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g4">
+  <div class="gotcha-tag">Gotcha 04</div>
+  <h2 class="section-title">Trust belongs at the read path, not the write path</h2>
+  <p>The moment memory becomes shareable &mdash; a registry of known failures, a team's accumulated gotchas &mdash; someone proposes gating writes. Reviewed submissions, an allowlist of contributors, a moderation queue. It feels responsible.</p>
+  <p>It also kills the thing that made the registry worth building. A shared knowledge base is valuable in proportion to how much gets into it; a write gate suppresses exactly the network effect you were trying to create, and it does so silently, because you never see the contributions that were never made.</p>
+  <p>The alternative is to let writes be unrestricted, attribute every entry to its author, and filter at <strong>read</strong> time by author reputation and corroboration. Spam still enters the store; it simply never surfaces in a query. You keep the network effect and you get a trust model that each consumer can tune to their own risk appetite.</p>
+  <div class="alert warn"><span class="alert-icon">&#9888;&#65039;</span><span><strong>Consequence:</strong> never add a write gate to fix a trust problem. Fix it in the query client. A write gate is a decision you make once, for everyone, forever; a read filter is a decision each reader makes for themselves.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g5">
+  <div class="gotcha-tag">Gotcha 05</div>
+  <h2 class="section-title">Some fields can never be retrofitted</h2>
+  <p>Two fields belong on every memory record from the very first commit, even though nothing consumes them yet: an <strong>encryption envelope</strong> and a <strong>provenance pointer</strong>.</p>
+  <p>The reason is asymmetric cost. Carrying an unused field is nearly free &mdash; a few bytes and a null. Adding one later to an append-only history is <em>impossible</em>, because you cannot rewrite committed records without destroying the append-only property that made the history trustworthy in the first place. History written without provenance can never gain it.</p>
+  <p>This is the one gotcha on this page that is purely about sequencing. There is no clever recovery, no migration script. You either wrote the field or you have a permanent hole in your record from day one to the day you noticed.</p>
+  <div class="alert danger"><span class="alert-icon">&#128721;</span><span><strong>Consequence:</strong> before your first commit in any append-only system, ask which fields would be impossible to add later. Carry those from the start even if the features consuming them are two phases away. Everything else can wait.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g6">
+  <div class="gotcha-tag">Gotcha 06</div>
+  <h2 class="section-title">Adoption dies at the fourth core verb</h2>
+  <p>The core surface here is three verbs: <code class="inline">commit</code>, <code class="inline">recall</code>, <code class="inline">prove</code>. That is a constraint, not a current state, and holding it has been harder than any individual feature.</p>
+  <p>Every genuinely useful capability arrives disguised as a fourth verb. Fork the memory. Export it. Replay a decision. Query the gotchas. Each one is reasonable in isolation, and each one raises the cost of the first ten minutes for every future adopter &mdash; the exact window in which most people decide whether to keep going.</p>
+  <p>The resolution is not to refuse the features but to refuse them <em>core status</em>. Secondary namespace, same code, one import deeper. Adoption cost stays flat; capability keeps growing.</p>
+  <pre><span class="c"># core: three verbs, forever</span>
+<span class="k">from</span> sdk <span class="k">import</span> Memory, Shard
+mem = Memory(<span class="s">"./mymemory"</span>)
+root   = mem.<span class="f">commit</span>([Shard(type=<span class="s">"gotchas"</span>, key=<span class="s">"gotcha.x"</span>, body={...})])
+shards = mem.<span class="f">recall</span>({<span class="s">"type"</span>: <span class="s">"gotchas"</span>, <span class="s">"contains"</span>: <span class="s">"db"</span>})
+proof  = mem.<span class="f">prove</span>({<span class="s">"type"</span>: <span class="s">"gotchas"</span>, <span class="s">"key"</span>: <span class="s">"gotcha.x"</span>})
+
+<span class="c"># everything else lives one level down</span>
+<span class="k">from</span> sdk.ext <span class="k">import</span> fork, export, import_, replay</pre>
+  <div class="alert info"><span class="alert-icon">&#128161;</span><span><strong>Consequence:</strong> treat the core verb count as a spec-level constant that requires human approval to change, not an implementation detail a refactor can quietly increment.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="g7">
+  <div class="gotcha-tag">Gotcha 07 &middot; the measured one</div>
+  <h2 class="section-title">A flat manifest makes recall O(history) again</h2>
+  <p>This is the failure mode that survived design review, survived code review, and was caught only because the benchmark existed.</p>
+  <p>The whole architecture rests on one claim: recall cost is O(relevant shards), never O(history). We built typed content-addressed shards behind a manifest, measured it &mdash; and the addressed-recall arm grew <strong>21&times;</strong> from 10 to 1,000 committed decisions. Flat cost was the entire point, and we did not have it.</p>
+  <p>The cause was the manifest topology. With a <strong>single flat manifest</strong> indexing every shard, each new decision adds an entry that <em>every subsequent recall must load</em> &mdash; including recalls that have nothing to do with decisions. The shards were addressable; the index in front of them was not. We had rebuilt the transcript one level up and could not see it, because every individual component behaved exactly as designed.</p>
+  <p>The fix is a <strong>two-level manifest</strong>: a constant-size root manifest pointing at per-type sub-manifests, so a typed query never loads the index for types it did not ask about. That restored 1.00&times; growth.</p>
+  <pre><span class="c"># BEFORE - one index, every recall pays for all history</span>
+manifest.json  <span class="bad">-&gt; { every shard ever committed }</span>
+
+<span class="c"># AFTER - constant-size root, per-type sub-manifests</span>
+manifest.json  <span class="good">-&gt; { gotchas: cid, facts: cid, decisions: cid }</span>
+  &#8627; gotchas.json    <span class="c"># loaded only for a gotchas query</span>
+  &#8627; decisions.json  <span class="c"># never loaded by a gotchas query</span></pre>
+  <div class="alert danger"><span class="alert-icon">&#128721;</span><span><strong>Consequence:</strong> the index loaded on every recall must be constant-size. Addressable storage behind a linear index is still linear &mdash; and it will pass every unit test you write, because correctness is unaffected. Only a cost benchmark at increasing history depth exposes it.</span></div>
+  <div class="alert warn"><span class="alert-icon">&#9888;&#65039;</span><span><strong>Known residual, stated honestly:</strong> recall within a single type is still O(shards-of-that-type). For types whose key count grows without bound, the same class of problem returns at a higher level. That question is open, and it is tracked as open rather than quietly claimed as solved.</span></div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="numbers">
+  <div class="section-eyebrow">Evidence</div>
+  <h2 class="section-title">What the benchmark actually measured</h2>
+  <p>Identical task sets, two retrieval strategies, real API token counts on a pinned model. Arm A replays the transcript; Arm B resolves only the shards the task addresses.</p>
+  <div class="tablebox"><table>
+    <tr><th>Committed decisions</th><th>Transcript replay</th><th>Addressed recall</th></tr>
+    <tr><td class="mono">10</td><td class="mono">5,326</td><td class="mono">2,771</td></tr>
+    <tr><td class="mono">100</td><td class="mono">17,566</td><td class="mono">2,766</td></tr>
+    <tr><td class="mono">1,000</td><td class="mono">139,966</td><td class="mono">2,769</td></tr>
+    <tr><td>Growth</td><td><span class="grow">26.3&times; &mdash; tracks history</span></td><td><span class="flat">1.00&times; &mdash; flat</span></td></tr>
+  </table></div>
+  <p>Figures are input tokens per task. At the pinned model's input pricing, a task against a 1,000-decision history costs roughly <strong>$0.140</strong> under replay versus <strong>$0.003</strong> with addressed recall &mdash; about <strong>47&times;</strong> cheaper &mdash; with latency falling from ~4.5s to ~1.2s. On larger models the dollar gap multiplies; the <em>shape</em> is what matters and the shape is architectural.</p>
+  <p>The honest caveats, because Gotchas 01 and 02 apply to our own numbers as much as anyone's: the model version is recorded with every figure, cold-start and within-invocation cache effects are reported separately rather than blended, and the default benchmark mode is a zero-cost mock that reproduces the scaling shape without spending anything. Mock figures are labelled as valid for shape, not for absolute dollars.</p>
+  <pre><span class="c"># reproduce it yourself</span>
+python -m bench.run                    <span class="c"># offline mock, no API key, no spend</span>
+python -m bench.run --real --cap 3.0   <span class="c"># real tokens, hard spend cap in code</span></pre>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="section" id="verify">
+  <div class="section-eyebrow">Checklist</div>
+  <h2 class="section-title">Auditing your own agent's memory</h2>
+  <p>Whatever you have built or adopted, these are the checks that would have caught the seven failures above. Most take minutes.</p>
+  <ul class="check">
+    <li><strong>Plot cost against history depth, not just correctness.</strong> Run identical tasks at 10, 100, and 1,000 stored items. If per-task input tokens grow, your recall is O(history) whatever the design doc claims. This is the only check that catches Gotcha 07.</li>
+    <li><strong>Check what your index costs.</strong> Whatever structure every recall loads &mdash; manifest, catalogue, embedding table header &mdash; measure whether it grows with total items. Addressable storage behind a linear index is linear.</li>
+    <li><strong>Pin the model version and record it with every figure.</strong> Any number without a model version beside it is unfalsifiable.</li>
+    <li><strong>Report cold-start and cached costs separately.</strong> If you can only quote a blended number, you cannot predict what a daily-cadence deployment will cost.</li>
+    <li><strong>Ask which fields you could never add later.</strong> In an append-only store the answer is "most of them". Carry provenance and an encryption envelope from the first commit.</li>
+    <li><strong>Count your core verbs.</strong> If the first ten minutes require learning more than three operations, measure your drop-off before adding a fourth.</li>
+    <li><strong>Try to corrupt it.</strong> Flip a byte in a stored object and re-read. You should get an explicit integrity error, not silently wrong memory. Memory you cannot verify is memory you cannot trust after any incident.</li>
+    <li><strong>Test a cold start with zero session state.</strong> An agent should rebuild working context from the index alone. If it needs the transcript, you still have a transcript.</li>
+  </ul>
+</div>
+
+<hr class="divider">
+
+<div class="footer-note">
+  Written while building <a href="index.html">fenix-memory</a> &mdash; durable, provable memory for AI agents, MIT-licensed and running entirely locally.<br>
+  Every figure here is reproducible from the repo: <a href="https://github.com/pointless130-sudo/fenix-memory" rel="noopener">github.com/pointless130-sudo/fenix-memory</a><br>
+  Found an error, or a failure mode we missed? <a href="mailto:support@fenix-yield.com">support@fenix-yield.com</a> &mdash; corrections credited.
+</div>
+
+</div>
+
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "849608e18f3c4d5a8edf7ed2f0a046e1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
