@@ -29,8 +29,16 @@ substrate to fit a domain, that is a defect, not a feature.
 | L2 | On-chain anchoring of roots | Third parties can verify history is intact | Yes |
 | L3 | Identity, ZK policy proofs, shared registries, settlement | Portable reputation, provable compliance | Yes |
 
-**Current scope is L0 + L1 only.** No chain, no wallet, no gas, no ZK. Anything in this
-repo that reaches for a chain right now is out of scope — say so and stop.
+**Current scope is L0 + L1, plus encryption at rest and opt-in L2 anchoring of roots.**
+Widened from "L0 + L1 only" by owner approval on 2026-11-12. Still out of scope: all of
+L3 (identity, ZK proofs, shared registries, settlement) and anything that stores other
+people's data. Anything in this repo that reaches for those is out of scope — say so and
+stop.
+
+Being in scope is not approval to act. Anchoring work stays on testnet, and the standing
+rules in §6 apply unchanged: no live keys, real funds or public on-chain commitments
+without explicit human approval at the time of the action. Work that touches keys or a
+wallet is CRITICAL under the stakes classifier in §2.
 
 ---
 
